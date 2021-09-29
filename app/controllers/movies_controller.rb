@@ -8,6 +8,7 @@ class MoviesController < ApplicationController
 
   def index
     sort
+    checkBox
     
     
   end
@@ -16,6 +17,36 @@ class MoviesController < ApplicationController
   def sort
     @sort = params[:sort] 
     @movies = Movie.order @sort
+  end
+  
+  
+  def checkBox
+    @all_ratings = ['G', 'PG', 'PG-13', 'R']
+    @lists = {}
+    
+   
+    @ratingSave = params[:ratings] || session[:ratings]
+    if @ratingSave == nil
+      session[:ratings] = {}
+      @all_ratings.each do |rating|
+        session[:ratings][rating] = 1
+      end
+      @ratingSave = session[:ratings]
+    end
+    
+    
+    
+    @all_ratings.each do |rating|
+      if !@ratingSave.nil? && @ratingSave.keys.include?(rating)
+        @lists[rating] = 1
+      end
+    end
+    session[:ratings] = @ratingSave
+    
+    
+    if @ratingSave
+      @movies = Movie.where(:rating => @ratingSave.keys).order @sort
+    end
   end
 
   def new
