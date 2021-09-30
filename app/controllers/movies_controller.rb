@@ -7,10 +7,8 @@ class MoviesController < ApplicationController
   end
 
   def index
-    sort
-    checkBox
-    
-    
+   checkBoxMemory
+   
   end
   
   
@@ -20,7 +18,36 @@ class MoviesController < ApplicationController
   end
   
   
-  def checkBox
+  # def checkBox
+  #   @all_ratings = ['G', 'PG', 'PG-13', 'R']
+  #   @lists = {}
+    
+   
+  #   @ratingSave = params[:ratings] || session[:ratings]
+  #   if @ratingSave == nil
+  #     session[:ratings] = {}
+  #     @all_ratings.each do |rating|
+  #       session[:ratings][rating] = 1
+  #     end
+  #     @ratingSave = session[:ratings]
+  #   end
+    
+    
+    
+  #   @all_ratings.each do |rating|
+  #     if !@ratingSave.nil? && @ratingSave.keys.include?(rating)
+  #       @lists[rating] = 1
+  #     end
+  #   end
+  #   session[:ratings] = @ratingSave
+    
+    
+  #   if @ratingSave
+  #     @movies = Movie.where(:rating => @ratingSave.keys).order @sort
+  #   end
+  # end
+  
+  def checkBoxMemory
     @all_ratings = ['G', 'PG', 'PG-13', 'R']
     @lists = {}
     
@@ -35,18 +62,36 @@ class MoviesController < ApplicationController
     end
     
     
+    setSort
+    
+    
     
     @all_ratings.each do |rating|
       if !@ratingSave.nil? && @ratingSave.keys.include?(rating)
         @lists[rating] = 1
       end
     end
+    session[:sort] = @sort
+
     session[:ratings] = @ratingSave
     
     
+    @movies = Movie.order @sort
     if @ratingSave
       @movies = Movie.where(:rating => @ratingSave.keys).order @sort
     end
+  end
+  
+  
+  def setSort
+    @sort = params[:sort] || session[:sort]
+    if !(params[:sort] == session[:sort] && params[:ratings] == session[:ratings])
+      params[:sort] = session[:sort] = @sort
+      params[:ratings] = session[:ratings] = @ratingSave
+      flash.keep
+      redirect_to movies_path(:sort=>params[:sort], :ratings =>params[:ratings])
+    end
+    
   end
 
   def new
